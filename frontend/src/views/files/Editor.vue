@@ -68,7 +68,7 @@ const router = useRouter();
 
 const editor = ref<Ace.Editor | null>(null);
 
-const isPreview = ref(false);
+const isPreview = ref(true);
 const previewContent = ref("");
 const isMarkdownFile =
   fileStore.req?.name.endsWith(".md") ||
