@@ -1,0 +1,53 @@
+version: 2
+
+project_name: filebrowser_hkc
+
+env:
+  - GO111MODULE=on
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X github.com/filebrowser/filebrowser/v2/version.Version={{ .Version }} -X github.com/filebrowser/filebrowser/v2/version.CommitSHA={{ .ShortCommit }}
+    main: main.go
+    binary: filebrowser
+    goos:
+      - linux
+    goarch:
+      - amd64
+
+archives:
+  - name_template: "{{.Os}}-{{.Arch}}{{if .Arm}}v{{.Arm}}{{end}}-{{ .ProjectName }}"
+    formats: ["tar.gz"]
+    format_overrides:
+      - goos: windows
+        formats: ["zip"]
+
+dockers:
+  # Alpine docker images
+  - dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/amd64"
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "ghcr.io/hkclark/filebrowser_hkc:{{ .Tag }}-amd64"
+      - "ghcr.io/hkclark/filebrowser_hkc:v{{ .Major }}-amd64"
+    extra_files:
+      - docker
+
+docker_manifests:
+  - name_template: "ghcr.io/hkclark/filebrowser_hkc:latest"
+    image_templates:
+      - "ghcr.io/hkclark/filebrowser_hkc:{{ .Tag }}-amd64"
+  - name_template: "ghcr.io/hkclark/filebrowser_hkc:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/hkclark/filebrowser_hkc:{{ .Tag }}-amd64"
